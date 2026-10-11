@@ -32,3 +32,14 @@ For example, my application uses /planet/:id to display a specific planet based 
 
 URL-based routing makes the application more flexible because it supports deep linking and makes navigation easier to manage when deploying to web or mobile platforms.
 
+## Phase 5: Validation & Reflection
+
+**Journal Prompt:** What bugs or unexpected behaviors did you uncover during manual testing? If you consulted an AI tutor, what suggestions did it offer regarding routing or async handling, and what did you decide to implement or reject?
+
+During Phase 5, I focused on testing the Cosmic Explorer App to make sure the navigation and planetary database worked correctly. My testing included opening different planets, checking their information, confirming visits, and navigating between Mission Control and Docking Bay.
+
+One issue I considered was what would happen if a user entered an invalid planet ID in the URL. To address this, I used int.tryParse() and checked whether the ID was within the range of the planet catalog. If the ID is invalid, the application displays a Planet Not Found screen instead of crashing.
+
+I also reviewed the asynchronous navigation logic with AI assistance. One important recommendation was to keep the context.mounted check after awaiting a navigation result. I kept this approach because it helps prevent the application from trying to display a SnackBar after the widget is no longer active.
+
+I decided to keep the application simple rather than introducing more advanced state management tools because the existing GoRouter implementation meets the assignment requirements. Overall, this project helped me better understand Flutter navigation, passing data between screens, and handling navigation errors.
