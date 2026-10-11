@@ -1,5 +1,6 @@
 
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 void main() {
   runApp(const CosmicExplorerApp());
@@ -51,13 +52,45 @@ class PlanetCatalog {
   ];
 }
 
+// Phase 4: Declarative GoRouter Configuration
+final GoRouter appRouter = GoRouter(
+  routes: [
+    GoRoute(
+      path: '/',
+      builder: (context, state) => const MissionControl(),
+    ),
+    GoRoute(
+      path: '/docking-bay',
+      builder: (context, state) => const DockingBay(),
+    ),
+    GoRoute(
+      path: '/planet/:id',
+      builder: (context, state) {
+        final id = int.tryParse(
+          state.pathParameters['id'] ?? '',
+        );
+
+        if (id == null ||
+            id < 0 ||
+            id >= PlanetCatalog.planets.length) {
+          return const InvalidPlanetScreen();
+        }
+
+        final planet = PlanetCatalog.planets[id];
+
+        return PlanetDetail(planet: planet);
+      },
+    ),
+  ],
+);
+
 // Main Application
 class CosmicExplorerApp extends StatelessWidget {
   const CosmicExplorerApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MaterialApp.router(
       debugShowCheckedModeBanner: false,
       title: 'Cosmic Explorer',
       theme: ThemeData(
@@ -65,7 +98,7 @@ class CosmicExplorerApp extends StatelessWidget {
           seedColor: Colors.deepPurple,
         ),
       ),
-      home: const MissionControl(),
+      routerConfig: appRouter,
     );
   }
 }
@@ -82,6 +115,45 @@ class MissionControl extends StatelessWidget {
           'Cosmic Explorer - Mission Control',
         ),
       ),
+
+      // Phase 4: Navigation Drawer
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            const DrawerHeader(
+              decoration: BoxDecoration(
+                color: Colors.deepPurple,
+              ),
+              child: Text(
+                'IEA Command Systems',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 24,
+                ),
+              ),
+            ),
+            ListTile(
+              leading: const Icon(Icons.home),
+              title: const Text('Mission Control'),
+              onTap: () {
+                Navigator.pop(context);
+                context.go('/');
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.rocket_launch),
+              title: const Text('Docking Bay'),
+              onTap: () {
+                Navigator.pop(context);
+                context.go('/docking-bay');
+              },
+            ),
+          ],
+        ),
+      ),
+
+      // Planet Catalog
       body: ListView.builder(
         itemCount: PlanetCatalog.planets.length,
         itemBuilder: (context, index) {
@@ -92,22 +164,15 @@ class MissionControl extends StatelessWidget {
             subtitle: Text(planet.type),
             trailing: const Icon(Icons.arrow_forward_ios),
 
-            // Phase 3: Await a result from PlanetDetail
+            // Phase 4: Navigate using URL path
             onTap: () async {
               final String? result =
-              await Navigator.push<String>(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => PlanetDetail(
-                    planet: planet,
-                  ),
-                ),
+              await context.push<String>(
+                '/planet/$index',
               );
 
-              // Check that the screen is still mounted
               if (!context.mounted) return;
 
-              // Display the returned confirmation
               if (result != null) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
@@ -155,11 +220,10 @@ class PlanetDetail extends StatelessWidget {
             ),
             const SizedBox(height: 30),
 
-            // Phase 3: Return a confirmation message
+            // Return confirmation to Mission Control
             ElevatedButton(
               onPressed: () {
-                Navigator.pop(
-                  context,
+                context.pop(
                   'You visited ${planet.name}!',
                 );
               },
@@ -185,9 +249,29 @@ class DockingBay extends StatelessWidget {
       body: Center(
         child: ElevatedButton(
           onPressed: () {
-            Navigator.pop(context);
+            context.go('/');
           },
           child: const Text('Return to Control'),
+        ),
+      ),
+    );
+  }
+}
+
+// Fallback for invalid planet IDs
+class InvalidPlanetScreen extends StatelessWidget {
+  const InvalidPlanetScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Planet Not Found'),
+      ),
+      body: Center(
+        child: ElevatedButton(
+          onPressed: () => context.go('/'),
+          child: const Text('Return to Mission Control'),
         ),
       ),
     );
