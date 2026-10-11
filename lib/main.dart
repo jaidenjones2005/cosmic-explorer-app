@@ -39,12 +39,14 @@ class PlanetCatalog {
     Planet(
       name: 'Kepler-186f',
       type: 'Terrestrial',
-      description: 'Kepler-186f is an exoplanet located in the habitable zone of its star.',
+      description:
+      'Kepler-186f is an exoplanet located in the habitable zone of its star.',
     ),
     Planet(
       name: 'Proxima Centauri b',
       type: 'Terrestrial',
-      description: 'Proxima Centauri b orbits the closest star to our Sun.',
+      description:
+      'Proxima Centauri b orbits the closest star to our Sun.',
     ),
   ];
 }
@@ -89,8 +91,11 @@ class MissionControl extends StatelessWidget {
             title: Text(planet.name),
             subtitle: Text(planet.type),
             trailing: const Icon(Icons.arrow_forward_ios),
-            onTap: () {
-              Navigator.push(
+
+            // Phase 3: Await a result from PlanetDetail
+            onTap: () async {
+              final String? result =
+              await Navigator.push<String>(
                 context,
                 MaterialPageRoute(
                   builder: (context) => PlanetDetail(
@@ -98,6 +103,19 @@ class MissionControl extends StatelessWidget {
                   ),
                 ),
               );
+
+              // Check that the screen is still mounted
+              if (!context.mounted) return;
+
+              // Display the returned confirmation
+              if (result != null) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(result),
+                    duration: const Duration(seconds: 3),
+                  ),
+                );
+              }
             },
           );
         },
@@ -135,6 +153,18 @@ class PlanetDetail extends StatelessWidget {
               planet.description,
               style: const TextStyle(fontSize: 16),
             ),
+            const SizedBox(height: 30),
+
+            // Phase 3: Return a confirmation message
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(
+                  context,
+                  'You visited ${planet.name}!',
+                );
+              },
+              child: const Text('Confirm Visit'),
+            ),
           ],
         ),
       ),
@@ -142,7 +172,7 @@ class PlanetDetail extends StatelessWidget {
   }
 }
 
-// Docking Bay Screen (Retained from Phase 1)
+// Docking Bay Screen
 class DockingBay extends StatelessWidget {
   const DockingBay({super.key});
 

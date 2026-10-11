@@ -13,3 +13,11 @@ The navigation stack works like a stack of screens where the newest screen is pl
 ListView.builder is useful because it creates list items as they are needed instead of building every widget at once. This makes the application more efficient, especially when working with larger collections of data.
 
 In my Cosmic Explorer App, PlanetCatalog stores five Planet objects. MissionControl accesses those objects and displays them using ListView.builder. When a user selects a planet, Navigator.push() opens PlanetDetail and passes the selected Planet object through its constructor. This allows the detail screen to display the correct planet information without needing to create another copy of the data.
+
+## Phase 3: The Observation Log
+
+**Journal Prompt:** Explain the flow of data in round-trip navigation. How does MissionControl know when the user has returned from PlanetDetail, and how is the return value captured?
+
+In Phase 3, I added a Confirm Visit button that allows users to confirm when they have visited a planet. When a planet is selected, MissionControl uses Navigator.push() to open the PlanetDetail screen and awaits the result. Once the user clicks Confirm Visit, Navigator.pop() closes the detail screen and sends back a message containing the planet's name.
+
+The await keyword allows MissionControl to wait until the user returns before continuing. I also used context.mounted to make sure the widget is still active before displaying the SnackBar. This helps prevent errors when dealing with asynchronous navigation. The SnackBar then displays a message confirming which planet was visited.
